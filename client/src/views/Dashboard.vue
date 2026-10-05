@@ -208,22 +208,6 @@
                       {{ translatePriority(item.priority) }}
                     </span>
                   </td>
-                  <td>
-                    <button
-                      v-if="!item.purchase_order_id"
-                      @click.stop="openPOModal(item)"
-                      class="po-button create"
-                    >
-                      Create PO
-                    </button>
-                    <button
-                      v-else
-                      @click.stop="viewPO(item)"
-                      class="po-button view"
-                    >
-                      View PO
-                    </button>
-                  </td>
                 </tr>
               </tbody>
             </table>
@@ -286,13 +270,6 @@
       @close="showBacklogModal = false"
     />
 
-    <PurchaseOrderModal
-      :is-open="showPOModal"
-      :backlog-item="selectedBacklogForPO"
-      :mode="poModalMode"
-      @close="showPOModal = false"
-      @po-created="handlePOCreated"
-    />
   </div>
 </template>
 
@@ -324,9 +301,6 @@ export default {
     const selectedProduct = ref(null)
     const showBacklogModal = ref(false)
     const selectedBacklogItem = ref(null)
-    const showPOModal = ref(false)
-    const selectedBacklogForPO = ref(null)
-    const poModalMode = ref('create')
 
     // Use shared filters
     const {
@@ -650,28 +624,6 @@ export default {
       showBacklogModal.value = true
     }
 
-    const openPOModal = (item) => {
-      selectedBacklogForPO.value = item
-      poModalMode.value = 'create'
-      showPOModal.value = true
-    }
-
-    const viewPO = (item) => {
-      selectedBacklogForPO.value = item
-      poModalMode.value = 'view'
-      showPOModal.value = true
-    }
-
-    const handlePOCreated = (poData) => {
-      // Update the backlog item with the new PO ID
-      const item = allBacklogItems.value.find(b => b.id === poData.backlog_item_id)
-      if (item) {
-        item.purchase_order_id = poData.id
-        item.purchase_order = poData
-      }
-      showPOModal.value = false
-    }
-
     // Watch for filter changes and reload data
     watch([selectedPeriod, selectedLocation, selectedCategory, selectedStatus], () => {
       loadData()
@@ -714,13 +666,7 @@ export default {
       formatCurrency,
       Math,
       translateProductName,
-      translateWarehouse,
-      showPOModal,
-      selectedBacklogForPO,
-      poModalMode,
-      openPOModal,
-      viewPO,
-      handlePOCreated
+      translateWarehouse
     }
   }
 }

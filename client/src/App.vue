@@ -317,7 +317,8 @@ export default {
       }
     }
 
-    onMounted(loadTasks)
+    // Tasks are loaded from currentUser.value.tasks, no API endpoint needed
+    // onMounted(loadTasks)
 
     return {
       t,
