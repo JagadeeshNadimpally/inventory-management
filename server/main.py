@@ -120,6 +120,16 @@ class CreatePurchaseOrderRequest(BaseModel):
     expected_delivery_date: str
     notes: Optional[str] = None
 
+class RestockingOrderItem(BaseModel):
+    item_sku: str
+    item_name: str
+    quantity: int
+    unit_cost: float
+
+class CreateRestockingOrderRequest(BaseModel):
+    items: List[RestockingOrderItem]
+    total_value: float
+
 # API endpoints
 @app.get("/")
 def root():
@@ -303,6 +313,51 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.post("/api/orders/restocking", response_model=Order)
+def create_restocking_order(request: CreateRestockingOrderRequest):
+    """Create a new restocking order from user budget allocation"""
+    from datetime import datetime, timedelta
+    import uuid
+
+    # Generate unique order ID and number
+    order_id = str(uuid.uuid4())
+    next_order_num = len(orders) + 10000
+    order_number = f"RST-{next_order_num}"
+
+    # Get current date
+    today = datetime.now().strftime('%Y-%m-%d')
+    delivery_date = (datetime.now() + timedelta(days=7)).strftime('%Y-%m-%d')
+
+    # Create order items list
+    order_items = []
+    for item in request.items:
+        order_items.append({
+            'sku': item.item_sku,
+            'name': item.item_name,
+            'quantity': item.quantity,
+            'unit_price': item.unit_cost
+        })
+
+    # Create the order
+    new_order = {
+        'id': order_id,
+        'order_number': order_number,
+        'customer': 'Restocking Order',
+        'items': order_items,
+        'status': 'Submitted',
+        'order_date': today,
+        'expected_delivery': delivery_date,
+        'total_value': request.total_value,
+        'actual_delivery': None,
+        'warehouse': 'Internal',
+        'category': 'Restocking'
+    }
+
+    # Add to orders list
+    orders.append(new_order)
+
+    return new_order
 
 if __name__ == "__main__":
     import uvicorn
