@@ -359,6 +359,51 @@ def create_restocking_order(request: CreateRestockingOrderRequest):
 
     return new_order
 
+@app.post("/api/purchase-orders", response_model=PurchaseOrder)
+def create_purchase_order(request: CreatePurchaseOrderRequest):
+    """Create a new purchase order for a backlog item"""
+    import uuid
+    from datetime import datetime
+
+    # Generate unique ID
+    po_id = str(uuid.uuid4())
+
+    # Create the purchase order
+    new_po = {
+        'id': po_id,
+        'backlog_item_id': request.backlog_item_id,
+        'supplier_name': request.supplier_name,
+        'quantity': request.quantity,
+        'unit_cost': request.unit_cost,
+        'expected_delivery_date': request.expected_delivery_date,
+        'status': 'Submitted',
+        'created_date': datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
+        'notes': request.notes or ''
+    }
+
+    # Add to purchase orders list
+    purchase_orders.append(new_po)
+
+    # Update backlog item to mark it has a PO
+    for item in backlog_items:
+        if item['id'] == request.backlog_item_id:
+            item['purchase_order_id'] = po_id
+            break
+
+    return new_po
+
+@app.get("/api/purchase-orders/{backlog_item_id}", response_model=PurchaseOrder)
+def get_purchase_order_by_backlog_item(backlog_item_id: str):
+    """Get purchase order by backlog item ID"""
+    for po in purchase_orders:
+        if po['backlog_item_id'] == backlog_item_id:
+            return po
+
+    raise HTTPException(
+        status_code=404,
+        detail=f"Purchase order for backlog item {backlog_item_id} not found"
+    )
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
