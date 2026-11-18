@@ -1,42 +1,97 @@
 <template>
-  <div class="app">
-    <header class="top-nav">
-      <div class="nav-container">
-        <div class="logo">
-          <h1>{{ t('nav.companyName') }}</h1>
-          <span class="subtitle">{{ t('nav.subtitle') }}</span>
-        </div>
-        <nav class="nav-tabs">
-          <router-link to="/" :class="{ active: $route.path === '/' }">
-            {{ t('nav.overview') }}
-          </router-link>
-          <router-link to="/inventory" :class="{ active: $route.path === '/inventory' }">
-            {{ t('nav.inventory') }}
-          </router-link>
-          <router-link to="/orders" :class="{ active: $route.path === '/orders' }">
-            {{ t('nav.orders') }}
-          </router-link>
-          <router-link to="/spending" :class="{ active: $route.path === '/spending' }">
-            {{ t('nav.finance') }}
-          </router-link>
-          <router-link to="/demand" :class="{ active: $route.path === '/demand' }">
-            {{ t('nav.demandForecast') }}
-          </router-link>
-          <router-link to="/reports" :class="{ active: $route.path === '/reports' }">
-            Reports
-          </router-link>
-        </nav>
+  <div class="app" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-mark">IM</div>
+        <span class="sidebar-company">{{ t('nav.companyName') }}</span>
+        <button
+          class="sidebar-toggle"
+          @click="toggleSidebar"
+          :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <router-link to="/" class="sidebar-link" :class="{ active: $route.path === '/' }" :title="t('nav.overview')">
+          <svg class="sidebar-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="3" width="8" height="8" rx="1" stroke="currentColor" stroke-width="2"/>
+            <rect x="13" y="3" width="8" height="8" rx="1" stroke="currentColor" stroke-width="2"/>
+            <rect x="3" y="13" width="8" height="8" rx="1" stroke="currentColor" stroke-width="2"/>
+            <rect x="13" y="13" width="8" height="8" rx="1" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <span class="sidebar-label">{{ t('nav.overview') }}</span>
+        </router-link>
+
+        <router-link to="/inventory" class="sidebar-link" :class="{ active: $route.path === '/inventory' }" :title="t('nav.inventory')">
+          <svg class="sidebar-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M21 8L12 3L3 8L12 13L21 8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M3 8V16L12 21L21 16V8" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M12 13V21" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <span class="sidebar-label">{{ t('nav.inventory') }}</span>
+        </router-link>
+
+        <router-link to="/orders" class="sidebar-link" :class="{ active: $route.path === '/orders' }" :title="t('nav.orders')">
+          <svg class="sidebar-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <rect x="5" y="4" width="14" height="17" rx="2" stroke="currentColor" stroke-width="2"/>
+            <path d="M9 3H15V5H9V3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M8 11H16M8 15H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span class="sidebar-label">{{ t('nav.orders') }}</span>
+        </router-link>
+
+        <router-link to="/spending" class="sidebar-link" :class="{ active: $route.path === '/spending' }" :title="t('nav.finance')">
+          <svg class="sidebar-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2V22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M17 6C17 6 15 5 12 5C9 5 7 6.5 7 8.5C7 10.5 9 11 12 11.5C15 12 17 12.5 17 15C17 17 15 18.5 12 18.5C9 18.5 7 17 7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span class="sidebar-label">{{ t('nav.finance') }}</span>
+        </router-link>
+
+        <router-link to="/demand" class="sidebar-link" :class="{ active: $route.path === '/demand' }" :title="t('nav.demandForecast')">
+          <svg class="sidebar-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M3 17L9 11L13 15L21 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M15 7H21V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="sidebar-label">{{ t('nav.demandForecast') }}</span>
+        </router-link>
+
+        <router-link to="/reports" class="sidebar-link" :class="{ active: $route.path === '/reports' }" title="Reports">
+          <svg class="sidebar-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M4 20V10M12 20V4M20 20V14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="sidebar-label">Reports</span>
+        </router-link>
+
+        <router-link to="/restocking" class="sidebar-link" :class="{ active: $route.path === '/restocking' }" title="Restocking">
+          <svg class="sidebar-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M21 12A9 9 0 1 1 18.5 5.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M21 4V8H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 9V15M9 12H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span class="sidebar-label">Restocking</span>
+        </router-link>
+      </nav>
+    </aside>
+
+    <div class="main-area">
+      <header class="top-bar">
+        <input type="text" class="search-input" placeholder="Search...">
         <LanguageSwitcher />
         <ProfileMenu
           @show-profile-details="showProfileDetails = true"
           @show-tasks="showTasks = true"
         />
-      </div>
-    </header>
-    <FilterBar />
-    <main class="main-content">
-      <router-view />
-    </main>
+      </header>
+      <FilterBar />
+      <main class="main-content">
+        <router-view />
+      </main>
+    </div>
 
     <ProfileDetailsModal
       :is-open="showProfileDetails"
@@ -80,6 +135,16 @@ export default {
     const showProfileDetails = ref(false)
     const showTasks = ref(false)
     const apiTasks = ref([])
+
+    const storedCollapsed = localStorage.getItem('sidebar-collapsed')
+    const sidebarCollapsed = ref(
+      storedCollapsed !== null ? storedCollapsed === 'true' : window.innerWidth < 1024
+    )
+
+    const toggleSidebar = () => {
+      sidebarCollapsed.value = !sidebarCollapsed.value
+      localStorage.setItem('sidebar-collapsed', sidebarCollapsed.value.toString())
+    }
 
     // Merge mock tasks from currentUser with API tasks
     const tasks = computed(() => {
@@ -155,7 +220,9 @@ export default {
       tasks,
       addTask,
       deleteTask,
-      toggleTask
+      toggleTask,
+      sidebarCollapsed,
+      toggleSidebar
     }
   }
 }
@@ -177,93 +244,179 @@ body {
 }
 
 .app {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 240px 1fr;
   min-height: 100vh;
+  transition: grid-template-columns 0.2s ease;
 }
 
-.top-nav {
+.app.sidebar-collapsed {
+  grid-template-columns: 72px 1fr;
+}
+
+.sidebar {
   background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  border-right: 1px solid #e2e8f0;
   position: sticky;
   top: 0;
+  height: 100vh;
   z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 
-.nav-container {
-  max-width: 1600px;
-  margin: 0 auto;
+.sidebar-header {
   display: flex;
   align-items: center;
-  padding: 0 2rem;
+  gap: 0.625rem;
+  padding: 1rem;
   height: 70px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
 }
 
-.nav-container > .nav-tabs {
-  margin-left: auto;
-  margin-right: 1rem;
-}
-
-.nav-container > .language-switcher {
-  margin-right: 1rem;
-}
-
-.logo {
+.logo-mark {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  color: white;
   display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.813rem;
+  letter-spacing: 0.025em;
 }
 
-.logo h1 {
-  font-size: 1.375rem;
+.sidebar-company {
+  flex: 1;
+  font-size: 1rem;
   font-weight: 700;
   color: #0f172a;
   letter-spacing: -0.025em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.subtitle {
-  font-size: 0.813rem;
+.sidebar-collapsed .sidebar-company {
+  display: none;
+}
+
+.sidebar-toggle {
+  flex-shrink: 0;
+  background: none;
+  border: none;
   color: #64748b;
-  font-weight: 400;
-  padding-left: 0.75rem;
-  border-left: 1px solid #e2e8f0;
-}
-
-.nav-tabs {
+  cursor: pointer;
+  padding: 0.375rem;
+  border-radius: 6px;
   display: flex;
-  gap: 0.25rem;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
 }
 
-.nav-tabs a {
-  padding: 0.625rem 1.25rem;
+.sidebar-toggle:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.sidebar-collapsed .sidebar-toggle {
+  margin: 0 auto;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  overflow-y: auto;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
   color: #64748b;
   text-decoration: none;
   font-weight: 500;
   font-size: 0.938rem;
   border-radius: 6px;
   transition: all 0.2s ease;
-  position: relative;
+  white-space: nowrap;
 }
 
-.nav-tabs a:hover {
+.sidebar-link:hover {
   color: #0f172a;
   background: #f1f5f9;
 }
 
-.nav-tabs a.active {
+.sidebar-link.active {
   color: #2563eb;
   background: #eff6ff;
 }
 
-.nav-tabs a.active::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: #2563eb;
+.sidebar-icon {
+  flex-shrink: 0;
+}
+
+.sidebar-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-collapsed .sidebar-label {
+  display: none;
+}
+
+.sidebar-collapsed .sidebar-link {
+  justify-content: center;
+}
+
+.main-area {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.top-bar {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 2rem;
+  height: 70px;
+}
+
+.search-input {
+  flex: 1;
+  max-width: 320px;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  color: #1e293b;
+  background: #f8fafc;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #cbd5e1;
+  background: white;
+}
+
+.top-bar > .language-switcher {
+  margin-left: auto;
 }
 
 .main-content {
@@ -272,6 +425,26 @@ body {
   width: 100%;
   margin: 0 auto;
   padding: 1.5rem 2rem;
+}
+
+@media (max-width: 640px) {
+  .app,
+  .app.sidebar-collapsed {
+    grid-template-columns: 72px 1fr;
+  }
+
+  .sidebar-company,
+  .sidebar-label {
+    display: none;
+  }
+
+  .sidebar-link {
+    justify-content: center;
+  }
+
+  .sidebar-toggle {
+    margin: 0 auto;
+  }
 }
 
 .page-header {

@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from pydantic import BaseModel
+from datetime import datetime, timedelta
 from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders
 
 app = FastAPI(title="Factory Inventory Management System")
@@ -80,6 +81,8 @@ class Order(BaseModel):
     actual_delivery: Optional[str] = None
     warehouse: Optional[str] = None
     category: Optional[str] = None
+    order_type: Optional[str] = "customer"
+    lead_time_days: Optional[int] = None
 
 class DemandForecast(BaseModel):
     id: str
@@ -119,6 +122,28 @@ class CreatePurchaseOrderRequest(BaseModel):
     unit_cost: float
     expected_delivery_date: str
     notes: Optional[str] = None
+
+class RestockRecommendation(BaseModel):
+    sku: str
+    name: str
+    category: str
+    warehouse: str
+    unit_cost: float
+    recommended_quantity: int
+    line_total: float
+    current_demand: int
+    forecasted_demand: int
+    trend: str
+
+class RestockOrderItem(BaseModel):
+    sku: str
+    name: str
+    quantity: int
+    unit_price: float
+
+class CreateRestockOrderRequest(BaseModel):
+    items: List[RestockOrderItem]
+    budget: float
 
 # API endpoints
 @app.get("/")
@@ -303,6 +328,99 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.get("/api/restocking/recommendations", response_model=List[RestockRecommendation])
+def get_restocking_recommendations(budget: float):
+    """Get restocking recommendations based on budget and demand forecasts"""
+    recommendations = []
+    remaining_budget = budget
+
+    # Build inventory lookup by SKU for quick access
+    inventory_by_sku = {item['sku']: item for item in inventory_items}
+
+    # Create candidates: join demand forecasts with inventory
+    candidates = []
+    for forecast in demand_forecasts:
+        sku = forecast['item_sku']
+        if sku in inventory_by_sku:
+            inv_item = inventory_by_sku[sku]
+            needed_qty = max(0, forecast['forecasted_demand'] - inv_item['quantity_on_hand'])
+            if needed_qty > 0:
+                candidates.append({
+                    'sku': sku,
+                    'name': forecast['item_name'],
+                    'category': inv_item['category'],
+                    'warehouse': inv_item['warehouse'],
+                    'unit_cost': inv_item['unit_cost'],
+                    'needed_quantity': needed_qty,
+                    'current_demand': forecast['current_demand'],
+                    'forecasted_demand': forecast['forecasted_demand'],
+                    'trend': forecast['trend']
+                })
+
+    # Sort by forecasted demand descending (highest demand first)
+    candidates.sort(key=lambda x: x['forecasted_demand'], reverse=True)
+
+    # Greedily fill budget
+    for candidate in candidates:
+        if remaining_budget <= 0:
+            break
+
+        affordable_qty = int(remaining_budget / candidate['unit_cost'])
+        if affordable_qty <= 0:
+            continue
+
+        recommended_qty = min(candidate['needed_quantity'], affordable_qty)
+        line_total = recommended_qty * candidate['unit_cost']
+
+        recommendations.append({
+            'sku': candidate['sku'],
+            'name': candidate['name'],
+            'category': candidate['category'],
+            'warehouse': candidate['warehouse'],
+            'unit_cost': candidate['unit_cost'],
+            'recommended_quantity': recommended_qty,
+            'line_total': line_total,
+            'current_demand': candidate['current_demand'],
+            'forecasted_demand': candidate['forecasted_demand'],
+            'trend': candidate['trend']
+        })
+
+        remaining_budget -= line_total
+
+    return recommendations
+
+@app.post("/api/restocking/order", response_model=Order)
+def create_restocking_order(request: CreateRestockOrderRequest):
+    """Create a new restocking order"""
+    # Generate new order ID
+    max_id = max((int(o['id']) for o in orders), default=0)
+    new_id = str(max_id + 1)
+
+    # Create order object
+    now = datetime.now()
+    expected_delivery = now + timedelta(days=7)
+    total_value = sum(item.quantity * item.unit_price for item in request.items)
+
+    new_order = {
+        'id': new_id,
+        'order_number': f'RST-{new_id.zfill(4)}',
+        'customer': 'Internal Restocking',
+        'items': [{'sku': item.sku, 'name': item.name, 'quantity': item.quantity, 'unit_price': item.unit_price} for item in request.items],
+        'status': 'Processing',
+        'warehouse': 'Internal',
+        'category': 'Restocking',
+        'order_date': now.isoformat(),
+        'expected_delivery': expected_delivery.isoformat(),
+        'total_value': total_value,
+        'order_type': 'restocking',
+        'lead_time_days': 7
+    }
+
+    # Append to orders list (in-memory mutation)
+    orders.append(new_order)
+
+    return new_order
 
 if __name__ == "__main__":
     import uvicorn
