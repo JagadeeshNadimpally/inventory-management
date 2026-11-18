@@ -112,6 +112,9 @@ export default {
     onTimeDelivery: '定時配達',
     itemsCount: '{count}件',
     quantity: '数量',
+    submittedOrders: '提出済み注文',
+    leadTimeNote: '再入荷タブから作成された注文です。配送リードタイムは固定で7日間です',
+    sevenDaysLabel: '7日間',
     table: {
       orderNumber: '注文番号',
       orderId: '注文ID',
@@ -125,7 +128,8 @@ export default {
       totalValue: '合計金額',
       status: 'ステータス',
       expectedDelivery: '予定配達日',
-      actualDelivery: '実際の配達日'
+      actualDelivery: '実際の配達日',
+      leadTime: 'リードタイム'
     }
   },
 
@@ -188,6 +192,41 @@ export default {
     }
   },
 
+  // Restocking
+  restocking: {
+    title: '再入荷',
+    description: '需要予測に基づいて予算内で再入荷注文を計画',
+    budgetSection: {
+      title: '利用可能予算',
+      maxBudgetLabel: '総在庫価値',
+      budgetLabel: '配分する予算'
+    },
+    recommendations: {
+      title: '推奨品目',
+      noItems: '選択した予算内に収まる品目がありません',
+      table: {
+        select: '選択',
+        sku: 'SKU',
+        itemName: '品目名',
+        currentDemand: '現在の需要',
+        forecastedDemand: '予測需要',
+        unitCost: '単価',
+        itemTotal: '品目合計'
+      }
+    },
+    summary: {
+      title: '注文概要',
+      selectedItems: '選択された品目',
+      totalCost: '合計コスト',
+      remainingBudget: '残り予算'
+    },
+    placeOrder: '注文する',
+    placingOrder: '注文処理中...',
+    orderSuccess: '注文{orderNumber}が正常に送信されました！配送予定は7日後です。',
+    orderError: '注文の送信に失敗しました',
+    noSelection: '注文するには少なくとも1つの品目を選択してください'
+  },
+
   // Filters
   filters: {
     timePeriod: '期間',
@@ -204,6 +243,7 @@ export default {
     shipped: '出荷済み',
     processing: '処理中',
     backordered: 'バックオーダー',
+    submitted: '提出済み',
     inStock: '在庫あり',
     lowStock: '在庫僅少',
     adequate: '適量'

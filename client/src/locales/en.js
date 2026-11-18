@@ -112,6 +112,9 @@ export default {
     onTimeDelivery: 'On-Time Delivery',
     itemsCount: '{count} items',
     quantity: 'Qty',
+    submittedOrders: 'Submitted Orders',
+    leadTimeNote: 'Orders placed from the Restocking tab, fixed 7-day delivery lead time',
+    sevenDaysLabel: '7 Days',
     table: {
       orderNumber: 'Order Number',
       orderId: 'Order ID',
@@ -125,7 +128,8 @@ export default {
       totalValue: 'Total Value',
       status: 'Status',
       expectedDelivery: 'Expected Delivery',
-      actualDelivery: 'Actual Delivery'
+      actualDelivery: 'Actual Delivery',
+      leadTime: 'Lead Time'
     }
   },
 
@@ -188,6 +192,41 @@ export default {
     }
   },
 
+  // Restocking
+  restocking: {
+    title: 'Restocking',
+    description: 'Plan budget-based restocking orders from demand forecasts',
+    budgetSection: {
+      title: 'Available Budget',
+      maxBudgetLabel: 'Total Inventory Value',
+      budgetLabel: 'Budget to Allocate'
+    },
+    recommendations: {
+      title: 'Recommended Items',
+      noItems: 'No items fit within the selected budget',
+      table: {
+        select: 'Select',
+        sku: 'SKU',
+        itemName: 'Item Name',
+        currentDemand: 'Current Demand',
+        forecastedDemand: 'Forecasted Demand',
+        unitCost: 'Unit Cost',
+        itemTotal: 'Item Total'
+      }
+    },
+    summary: {
+      title: 'Order Summary',
+      selectedItems: 'Selected Items',
+      totalCost: 'Total Cost',
+      remainingBudget: 'Remaining Budget'
+    },
+    placeOrder: 'Place Order',
+    placingOrder: 'Placing Order...',
+    orderSuccess: 'Order {orderNumber} submitted successfully! Expected delivery in 7 days.',
+    orderError: 'Failed to place order',
+    noSelection: 'Select at least one item to place an order'
+  },
+
   // Filters
   filters: {
     timePeriod: 'Time Period',
@@ -204,6 +243,7 @@ export default {
     shipped: 'Shipped',
     processing: 'Processing',
     backordered: 'Backordered',
+    submitted: 'Submitted',
     inStock: 'In Stock',
     lowStock: 'Low Stock',
     adequate: 'Adequate'

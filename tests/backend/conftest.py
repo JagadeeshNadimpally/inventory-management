@@ -61,3 +61,19 @@ def sample_order():
         "total_value": 87799.5,
         "actual_delivery": "2025-01-20T10:19:00"
     }
+
+
+@pytest.fixture
+def sample_backlog_item():
+    """Sample backlog item for testing."""
+    return {
+        "id": "backlog-001",
+        "order_id": "ORD-2025-0005",
+        "item_sku": "PCB-102",
+        "item_name": "Multi-Layer PCB Assembly",
+        "quantity_needed": 150,
+        "quantity_available": 50,
+        "days_delayed": 5,
+        "priority": "High",
+        "purchase_order_id": None
+    }
