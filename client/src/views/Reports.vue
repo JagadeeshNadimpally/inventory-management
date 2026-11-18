@@ -134,14 +134,20 @@ import { formatCurrency } from '../utils/currency'
 export default {
   name: 'Reports',
   setup() {
-    const { t, currentCurrency } = useI18n()
+    const { t, currentCurrency, currentLocale } = useI18n()
     const loading = ref(true)
     const error = ref(null)
     const quarterlyData = ref([])
     const monthlyData = ref([])
 
     // Use shared filters
-    const { selectedPeriod } = useFilters()
+    const {
+      selectedPeriod,
+      selectedLocation,
+      selectedCategory,
+      selectedStatus,
+      getCurrentFilters
+    } = useFilters()
 
     // Compute max revenue for chart scaling
     const maxRevenue = computed(() => {
@@ -176,13 +182,14 @@ export default {
         loading.value = true
         error.value = null
 
+        const filters = getCurrentFilters()
         const [quarterly, monthly] = await Promise.all([
-          api.getQuarterlyReports(),
-          api.getMonthlyTrends()
+          api.getQuarterlyReports(filters),
+          api.getMonthlyTrends(filters)
         ])
 
-        quarterlyData.value = quarterly
-        monthlyData.value = monthly
+        quarterlyData.value = quarterly || []
+        monthlyData.value = monthly || []
       } catch (err) {
         error.value = 'Failed to load reports: ' + err.message
       } finally {
@@ -190,8 +197,8 @@ export default {
       }
     }
 
-    // Watch for filter changes and reload data
-    watch([selectedPeriod], () => {
+    // Watch for all filter changes and reload data
+    watch([selectedPeriod, selectedLocation, selectedCategory, selectedStatus], () => {
       loadData()
     })
 
@@ -210,9 +217,10 @@ export default {
         return monthStr
       }
 
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-      return `${monthNames[month - 1]} ${year}`
+      // Use locale-aware date formatting
+      const locale = currentLocale.value === 'ja' ? 'ja-JP' : 'en-US'
+      const date = new Date(year, month - 1, 1)
+      return date.toLocaleDateString(locale, { month: 'short', year: 'numeric' })
     }
 
     const getBarHeight = (revenue) => {
@@ -255,6 +263,7 @@ export default {
     return {
       t,
       currentCurrency,
+      currentLocale,
       loading,
       error,
       quarterlyData,

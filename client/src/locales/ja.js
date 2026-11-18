@@ -192,6 +192,35 @@ export default {
     }
   },
 
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期ごとのパフォーマンス指標と月別トレンドを表示',
+    quarterly: {
+      title: '四半期ごとのパフォーマンス',
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総収益',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: '履行率'
+    },
+    monthly: {
+      chartTitle: '月別収益トレンド',
+      analysisTitle: '前月比較',
+      month: '月',
+      orders: '注文',
+      revenue: '収益',
+      change: '変化',
+      growthRate: '成長率'
+    },
+    summary: {
+      totalRevenue: '総収益（YTD）',
+      avgMonthlyRevenue: '平均月間収益',
+      totalOrders: '総注文数',
+      bestQuarter: '最高成績四半期'
+    }
+  },
+
   // Restocking
   restocking: {
     title: '再入荷',
